@@ -1,8 +1,19 @@
-FROM golang:1.15.2
+FROM golang:1.15.2 as builder
+WORKDIR /go/src/github.com/cygnu/techtrain-mission
 
-ENV GOPATH /go
-ENV PATH $PATH:$GOPATH/bin
+COPY go.* .
+RUN go mod download
 
-RUN mkdir -p /go/src/api
-COPY . /go/src/api
-WORKDIR /go/src/api
+COPY . .
+
+ARG CGO_ENABLED=0
+ARG GOOS=linux
+ARG GOARCH=amd64
+RUN go build \
+    -o /go/bin/main \
+    -ldflags '-s -w'
+
+FROM scratch as runner
+
+COPY --from=builder /go/bin/main /app/main
+ENTRYPOINT ["/app/main"]
