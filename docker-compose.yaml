@@ -5,9 +5,9 @@ services:
       context: ./docker/api
       dockerfile: Dockerfile
     ports:
-      - 8080:8080
-    volumes:
-      - ./docker/api:/go/src/api
+      - "8080:8080"
+    depends_on:
+      - db
   db:
     build:
       context: ./docker/db
@@ -17,6 +17,8 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./docker/db/data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
       - ./docker/db/init:/docker-entrypoint-initdb.d
       - ./docker/db/my.cnf:/etc/mysql/my.cnf
+volumes:
+  mysql_data:
